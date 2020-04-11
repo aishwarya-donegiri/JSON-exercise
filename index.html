@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>HW4</title>
+	<script type="text/javascript">
+		
+		function viewJSON(what) 
+		{
+			var URL = what.URL.value;
+			console.log(URL);
+			if (URL.length==0)
+			{
+				throw alert("Enter a valid JSON file");
+			}
+			function loadJSON(url)
+			{
+				try
+				{
+					xmlhttp=new XMLHttpRequest(); //create XMLHttpRequest object
+					xmlhttp.open("GET",url,false); //Specifies the type of request method: the type of request: GET or POST url: the file location async: true (asynchronous) or false (synchronous)
+					xmlhttp.send();//opens the connection and sends the request to the server....Sends a request string to the server (used for POST)
+					if (xmlhttp.status === 404)
+					{
+						alert("Page not found");
+					}
+					console.log(xmlhttp.responseText);
+					jsonObj= JSON.parse(xmlhttp.responseText); //responseText:The response data as a string.....the JavaScript function JSON.parse() to convert text into a JavaScript object
+					return jsonObj;
+				}
+				catch(err)
+				{
+					alert("Page not found")
+				}
+			}
+			jsonObj = loadJSON(URL);
+			root=jsonObj.DocumentElement;
+			key_list=Object.keys(jsonObj.Mainline.Table);
+			if (key_list.includes("Row"))
+			{
+				rows=jsonObj.Mainline.Table.Row;
+				if (rows.length==0)
+				{
+					alert("There are no rows in the JSON file!");
+				}
+				else
+				{
+					jsonObj.onload=generateHTML(jsonObj);//Execute a JavaScript immediately after a page has been loaded
+					hWin = window.open("", "HW_4","height=800,width=600");// create a browser window
+					hWin.document.write(html_text);//write the HTML content into the browser window
+					hWin.document.close(); //close the browser window
+				}
+			}
+			else
+			{
+				alert("There are no rows in the JSON file!");
+			}
+		}
+		
+
+		function generateHTML(jsonObj) 
+		{
+			 //returns the root node of the document
+			html_text="<html><head><title>JSON Parse Result</title></head><body>";
+			html_text+="<table border='2'>";
+			/*caption=jsonObj.catalog.title;
+			html_text+="<caption align='left'><h1>"+caption+"</h1></caption>";*/
+			header=jsonObj.Mainline.Table.Header.Data; // an array of planes
+			html_text+="<tbody>";
+			html_text+="<tr>";
+			//x=0; 
+			//y=0;
+			// output the headers
+			for(i=0;i<header.length;i++) 
+			{
+				html_text+="<th>"+header[i]+"</th>";
+			}
+			
+			html_text+="</tr>";
+			// output out the values
+			
+			for(i=0;i<rows.length;i++) //do for all places (one per row)
+			{
+				html_text+="<tr>";
+				row=rows[i];
+				html_text+="<td>"+row.Rank+"</td><td>"+row.Name+"</td><td>";
+				for(j=0;j<row.Hubs.Hub.length;j++)
+				{
+					if(j==0)
+					{
+						html_text+="<ul><b><li>"+row.Hubs.Hub[0]+"</li></b>";
+					}
+					else
+					{
+						html_text+="<li>"+row.Hubs.Hub[j]+"</li>";
+					}
+					
+				}
+				html_text+="</ul></td>";
+				html_text+="<td>"+ row.Height +"</td><td>";
+				html_text+='<a href="'+row.HomePage+'">'+row.HomePage+'</a>';
+				html_text+="<td><img src='"+ row.Logo +"' width=150px height=150px alt='Image Unavailable'></td>";
+				html_text+="</tr>";
+			}
+			html_text+="</tbody>";
+			html_text+="</table>";
+			html_text+= "</bo" + "<dy> </html>"; 
+		}
+
+	</script>
+</head>
+
+<body style="text-align: center; margin-top: 100px;">
+	<h1>Enter URL for list of tallest buildings JSON File</h1>
+	<form name="myform" method="POST" id="location">
+		<input type="text" name="URL" maxlength="300" size="50" value=""/>
+		<br />
+		<input style="margin: 40px;padding-bottom: 2px" type="button" name="submit" value="Submit Query" onClick="viewJSON(this.form)" />
+	</form>
+
+	
+</body>
+</html>
